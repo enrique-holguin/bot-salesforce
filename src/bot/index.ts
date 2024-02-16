@@ -5,7 +5,7 @@ import BOT_PROVIDER from "./provider";
 import { SalesForce } from "src/salesforce/class";
 
 const INIT_BOT = async (salesforce:SalesForce) => {
-  return await createBot({flow:BOT_FLOW,database:BOT_DB,provider:BOT_PROVIDER},{extensions:salesforce})
+  return await createBot({flow:BOT_FLOW,database:BOT_DB,provider:BOT_PROVIDER},{extensions:{salesforce}})
 }
 
 export default INIT_BOT

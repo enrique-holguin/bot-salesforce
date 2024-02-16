@@ -1,5 +1,4 @@
 import { Auth, Session } from "./types"
-import * as crypto from 'crypto'
 
 export class SalesForce {
   private readonly clientId = process.env.CLIENT_ID
@@ -54,7 +53,7 @@ export class SalesForce {
   }
   
   generateUUID() {
-    return crypto.randomUUID()
+    return global.crypto.randomUUID()
   }
 
   async initSession(uuid:string) {

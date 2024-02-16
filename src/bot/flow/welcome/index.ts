@@ -4,16 +4,17 @@ import { SalesForce } from "src/salesforce/class";
 
 const flowWelcome = addKeyword<BaileysProvider,MemoryDB>(EVENTS.WELCOME).addAction(async (ctx,{extensions,flowDynamic,endFlow,provider,database,state}) => {
   const salesforce:SalesForce = extensions?.salesforce
-  console.log("hola")
   const myState = state.getMyState()
   if (!myState?.session) {
     const uuid = salesforce.generateUUID()
     const response = await salesforce.initSession(uuid)
     state.update({uuid,response,session:true})
-    response.messages.forEach(async (message) => {
+    for (let message of response.messages) {
+      await utils.delay(800)
       await flowDynamic(message.text)
-      await utils.delay(1000)
-    })
+      await utils.delay(800)
+    }
+    return endFlow()
   }
   return endFlow("Sesión ya iniciada")
 })
