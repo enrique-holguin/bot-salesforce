@@ -1,10 +1,10 @@
 import { SalesForce } from "./class";
 
+const salesforce = new SalesForce()
+
 const INIT_SALESFORCE = async () => {
-  const salesforce = new SalesForce()
   await salesforce.getToken()
-  const uuid = salesforce.generateUUID()
-  await salesforce.initSession(uuid)
+  return salesforce
 }
 
 export default INIT_SALESFORCE

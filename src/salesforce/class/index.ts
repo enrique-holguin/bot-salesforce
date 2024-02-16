@@ -47,14 +47,9 @@ export class SalesForce {
     formData.append('client_secret', this.clientSecret);
     formData.append('grant_type', 'client_credentials');
     const headers = {"Content-Type": "application/x-www-form-urlencoded"};
-    try {
     const data =  await fetch(url,{method: "POST",body:formData,headers})
     const payload:Auth = await data.json()
     this.token = payload.access_token
-  }
-  catch(err) {
-    console.error(err)
-  }
   }
   
   generateUUID() {
