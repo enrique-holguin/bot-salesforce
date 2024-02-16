@@ -1,4 +1,5 @@
 import { Auth, Session } from "./types"
+import * as crypto from 'crypto'
 
 export class SalesForce {
   private readonly clientId = process.env.CLIENT_ID
@@ -53,7 +54,7 @@ export class SalesForce {
   }
   
   generateUUID() {
-    return global.crypto.randomUUID()
+    return crypto.randomUUID()
   }
 
   async initSession(uuid:string) {
@@ -71,7 +72,7 @@ export class SalesForce {
     try {
       const data = await fetch(this.urlSession(),{body,headers:requestHeaders,method:'POST'})
       const response:Session = await data.json()
-      console.log(response.messages)
+      return response
     }
     catch (err) {
       console.error(err)
