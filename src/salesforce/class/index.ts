@@ -1,4 +1,4 @@
-import { Auth } from "./types"
+import { Auth, Session } from "./types"
 
 export class SalesForce {
   private readonly clientId = process.env.CLIENT_ID
@@ -7,10 +7,36 @@ export class SalesForce {
   private readonly requestId = process.env.X_Request_Id
   private readonly endpoint = process.env.ENDPOINT
   private readonly postSession = process.env.POSTFIX_SESSION
-  public readonly token:string 
+  private readonly runtime = process.env.RUNTIME_URL
+  private readonly botId = process.env.BOT_ID
+  private readonly botVersion = process.env.BOT_VERSION
+  public token:string 
 
-  constructor() {}
-  buildUrl(post:string) {
+  constructor() {
+  }
+
+  /**
+   * 
+   * @param state "bots" se usa para iniciar una sesión y "sessions" para continuar la sesión
+   * @returns 
+   */
+  private buildUrlRequest() {
+    return `${this.runtime}/${this.botVersion}`
+  }
+
+  private urlSession() {
+    return `${this.buildUrlRequest()}/bots/${this.botId}/sessions`
+  }
+
+  /**
+   * 
+   * @param sessionId id obtenido cuando se inicia sesión o se envía un mensaje
+   * @returns 
+   */
+  private urlMessage(sessionId:string) {
+    return `${this.buildUrlRequest()}/sessions/${sessionId}/messages`
+  }
+  private buildUrl(post:string) {
     return `${this.endpoint}/${post}`
   }
   async getToken() {
@@ -24,10 +50,36 @@ export class SalesForce {
     try {
     const data =  await fetch(url,{method: "POST",body:formData,headers})
     const payload:Auth = await data.json()
-    return payload.access_token
+    this.token = payload.access_token
   }
   catch(err) {
     console.error(err)
   }
+  }
+  
+  generateUUID() {
+    return global.crypto.randomUUID()
+  }
+
+  async initSession(uuid:string) {
+    const requestHeaders: HeadersInit = new Headers();
+    requestHeaders.set('X-Org-Id',this.orgId)
+    requestHeaders.set('X-Request-Id',this.requestId)
+    requestHeaders.set('Authorization',`Bearer ${this.token}`)
+    requestHeaders.set('Content-Type','application/json')
+    const body = JSON.stringify({
+      forceConfig : {
+        endpoint : this.endpoint
+      },
+      externalSessionKey : uuid
+    })
+    try {
+      const data = await fetch(this.urlSession(),{body,headers:requestHeaders,method:'POST'})
+      const response:Session = await data.json()
+      console.log(response.messages)
+    }
+    catch (err) {
+      console.error(err)
+    }
   }
 }
