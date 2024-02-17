@@ -1,4 +1,5 @@
 import { Auth } from './Auth';
-import { Message } from './message';
+import { ResponseMsg } from './message';
 import { Session } from './session';
-export {Auth,Message,Session}
+import { SendMessage } from './sendMsg';
+export {Auth,ResponseMsg as Message,Session,SendMessage}

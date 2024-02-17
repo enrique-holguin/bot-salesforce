@@ -1,4 +1,4 @@
-export interface Message {
+export interface ResponseMsg {
   botVersion:           string;
   messages:             MessageElement[];
   processedSequenceIds: number[];

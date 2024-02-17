@@ -1,4 +1,4 @@
-import { Auth, Session } from "./types"
+import { Auth, SendMessage, Session } from "./types"
 
 export class SalesForce {
   private readonly clientId = process.env.CLIENT_ID
@@ -15,17 +15,22 @@ export class SalesForce {
   constructor() {
   }
 
-  /**
-   * 
-   * @param state "bots" se usa para iniciar una sesión y "sessions" para continuar la sesión
-   * @returns 
-   */
+
   private buildUrlRequest() {
     return `${this.runtime}/${this.botVersion}`
   }
 
   private urlSession() {
     return `${this.buildUrlRequest()}/bots/${this.botId}/sessions`
+  }
+
+  private buildHeaders() {
+    const headers:HeadersInit = new Headers()
+    headers.set('X-Org-Id',this.orgId)
+    headers.set('X-Request-Id',this.requestId)
+    headers.set('Authorization',`Bearer ${this.token}`)
+    headers.set('Content-Type','application/json')
+    return headers
   }
 
   /**
@@ -41,7 +46,6 @@ export class SalesForce {
   }
   async getToken() {
     const url = this.buildUrl(this.postSession)
-    console.log(url)
     const formData = new URLSearchParams();
     formData.append('client_id', this.clientId);
     formData.append('client_secret', this.clientSecret);
@@ -57,11 +61,7 @@ export class SalesForce {
   }
 
   async initSession(uuid:string) {
-    const requestHeaders: HeadersInit = new Headers();
-    requestHeaders.set('X-Org-Id',this.orgId)
-    requestHeaders.set('X-Request-Id',this.requestId)
-    requestHeaders.set('Authorization',`Bearer ${this.token}`)
-    requestHeaders.set('Content-Type','application/json')
+    const requestHeaders = this.buildHeaders()
     const body = JSON.stringify({
       forceConfig : {
         endpoint : this.endpoint
@@ -70,8 +70,34 @@ export class SalesForce {
     })
     try {
       const data = await fetch(this.urlSession(),{body,headers:requestHeaders,method:'POST'})
-      const response:Session = await data.json()
-      return response
+      if (data.status === 200) {
+        const response:Session = await data.json()
+        return response
+      }
+      throw new Error("Error fetch")
+    }
+    catch (err) {
+      console.error(err)
+    }
+  }
+
+  async sendMessage(payload:{sequenceId:number,inReplyToMessageId:string,text:string,sessionId:string}) {
+    const headers = this.buildHeaders()
+    const body:SendMessage = {
+      message: {
+        sequenceId:payload.sequenceId,
+        type:"text",
+        text:payload.text,
+        inReplyToMessageId:payload.inReplyToMessageId
+      }
+    }
+    try {
+      const data = await fetch(this.urlMessage(payload.sessionId),{method:"POST",headers,body:JSON.stringify(body)})
+      if (data.status === 200) {
+        const response:Session = await data.json()
+        return response
+      }
+      throw new Error("Error fetch")
     }
     catch (err) {
       console.error(err)
