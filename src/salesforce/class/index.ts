@@ -1,6 +1,7 @@
 import { Auth, SendMessage, Session } from "./types"
 
 export class SalesForce {
+  private static instance:SalesForce
   private readonly clientId = process.env.CLIENT_ID
   private readonly clientSecret = process.env.CLIENT_SECRET
   private readonly orgId = process.env.X_Org_Id 
@@ -13,6 +14,10 @@ export class SalesForce {
   public token:string 
 
   constructor() {
+    if(SalesForce.instance) {
+      return SalesForce.instance
+    }
+    SalesForce.instance = this
   }
 
 
@@ -82,6 +87,7 @@ export class SalesForce {
   }
 
   async sendMessage(payload:{sequenceId:number,inReplyToMessageId:string,text:string,sessionId:string}) {
+    console.log("iD para la request -->",payload.inReplyToMessageId)
     const headers = this.buildHeaders()
     const body:SendMessage = {
       message: {
